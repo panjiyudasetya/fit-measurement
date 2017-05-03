@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Fit Measurement</string>
+    <string name="lbl_no_history">No history available.</string>
+
+    <!-- Bottom Navigation Action Menu -->
+    <string name="am_steps_label">Steps Count</string>
+    <string name="am_sleep_label">Sleep History</string>
+</resources>

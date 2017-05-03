@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_walk"
+        android:icon="@drawable/ic_walk"
+        android:title="@string/am_steps_label" />
+    <item
+        android:id="@+id/menu_sleep"
+        android:icon="@drawable/ic_sleep"
+        android:title="@string/am_sleep_label" />
+</menu>
