@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 
 /**
  * Created by panjiyudasetya on 5/3/17.
@@ -41,5 +42,51 @@ public class Content {
 
     public String getTimeStamp() {
         return timeStamp;
+    }
+
+    public static class Builder {
+        private String dataPointType;
+        private String startTimeDetected;
+        private String endTimeDetected;
+        private Map<String, String> fields;
+
+        public Builder dataPointType(String dataPointType) {
+            this.dataPointType = dataPointType;
+            return this;
+        }
+
+        public Builder startTimeDetected(String startTimeDetected) {
+            this.startTimeDetected = startTimeDetected;
+            return this;
+        }
+
+        public Builder endTimeDetected(String endTimeDetected) {
+            this.endTimeDetected = endTimeDetected;
+            return this;
+        }
+
+        public Builder fields(Map<String, String> fields) {
+            this.fields = fields;
+            return this;
+        }
+
+        public String build() {
+            String strContent = "Data point:\n"
+                    + "\tType: " + dataPointType + "\n"
+                    + "\tStart: " + startTimeDetected  + "\n"
+                    + "\tEnd: " + endTimeDetected + "\n";
+
+            String strFields = "";
+            if (fields != null && fields.size() > 0) {
+                strFields += "\n";
+                int i = 0;
+                for (Map.Entry<String, String> field : fields.entrySet()) {
+                    strFields += (i == 0 ? "" : "\n") + "\tField: "
+                            + field.getKey() + ", Value: " + field.getValue();
+                    i++;
+                }
+            }
+            return strContent + strFields;
+        }
     }
 }

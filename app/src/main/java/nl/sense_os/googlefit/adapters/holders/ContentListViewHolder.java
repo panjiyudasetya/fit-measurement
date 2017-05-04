@@ -38,6 +38,11 @@ public class ContentListViewHolder extends BaseViewHolder<Content> {
         }
 
         mTvContent.setText(item.getContent());
-        mTvTimeStamp.setText(item.getTimeStamp());
+        mTvTimeStamp.setText(
+            String.format("%s %s",
+                    mContext.getString(R.string.lbl_recorded_at),
+                    item.getTimeStamp()
+            )
+        );
     }
 }

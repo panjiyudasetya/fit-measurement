@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Fit Measurement</string>
+    <string name="app_alt_name">FMeasurement</string>
     <string name="lbl_no_history">No history available.</string>
+    <string name="lbl_recorded_at">Recorded at : </string>
 
     <!-- Bottom Navigation Action Menu -->
     <string name="am_steps_label">Steps Count</string>

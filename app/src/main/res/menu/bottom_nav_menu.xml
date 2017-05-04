@@ -1,10 +1,17 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_walk"
+        android:orderInCategory="1"
+        android:enabled="true"
         android:icon="@drawable/ic_walk"
-        android:title="@string/am_steps_label" />
+        android:title="@string/am_steps_label"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/menu_sleep"
+        android:orderInCategory="2"
+        android:enabled="true"
         android:icon="@drawable/ic_sleep"
-        android:title="@string/am_sleep_label" />
+        android:title="@string/am_sleep_label"
+        app:showAsAction="ifRoom"/>
 </menu>

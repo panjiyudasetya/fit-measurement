@@ -11,8 +11,9 @@ import butterknife.BindView;
 import nl.sense_os.googlefit.R;
 import nl.sense_os.googlefit.constant.Navigation;
 import nl.sense_os.googlefit.core.BaseActivity;
-import nl.sense_os.googlefit.entities.Content;
-import nl.sense_os.googlefit.fragments.ContentFragment;
+import nl.sense_os.googlefit.fragments.ContentListFragment;
+import nl.sense_os.googlefit.fragments.SleepHistoryFragment;
+import nl.sense_os.googlefit.fragments.StepCountFragment;
 
 public class MainActivity extends BaseActivity {
     @BindView(R.id.toolbar)
@@ -21,6 +22,7 @@ public class MainActivity extends BaseActivity {
     BottomNavigationView mNavigationView;
 
     private int mSelectedItem;
+    private int mActiveMenuId;
 
     @Override
     protected int initWithLayout() {
@@ -59,6 +61,7 @@ public class MainActivity extends BaseActivity {
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    setupContent(item);
                     return true;
                 }
             }
@@ -66,40 +69,38 @@ public class MainActivity extends BaseActivity {
 
         MenuItem selectedItem;
         if (savedInstanceState != null) {
-            mSelectedItem = savedInstanceState.getInt(Navigation.SELECTED_ITEM_KEY, 0);
+            mSelectedItem = savedInstanceState.getInt(Navigation.SELECTED_ITEM_KEY, R.id.menu_walk);
+            mNavigationView.setSelectedItemId(mSelectedItem);
             selectedItem = mNavigationView.getMenu().findItem(mSelectedItem);
-        } else selectedItem = mNavigationView.getMenu().getItem(0);
+        } else selectedItem = mNavigationView.getMenu().findItem(R.id.menu_walk);
 
         setupContent(selectedItem);
+
     }
 
     private void setupContent(@NonNull MenuItem menuItem) {
-        ContentFragment fragment;
+        if (mActiveMenuId == menuItem.getItemId()) return;
+
+        ContentListFragment fragment;
         switch (menuItem.getItemId()) {
             case R.id.menu_walk:
-                fragment = ContentFragment.newInstance(Content.STEPS_TYPE);
+                fragment = StepCountFragment.newInstance();
                 break;
             case R.id.menu_sleep:
-                fragment = ContentFragment.newInstance(Content.SLEEP_TYPE);
+                fragment = SleepHistoryFragment.newInstance();
                 break;
             default:
-                fragment = ContentFragment.newInstance(Content.STEPS_TYPE);
+                fragment = StepCountFragment.newInstance();
                 break;
         }
 
-        setActiveTab(menuItem);
+        mSelectedItem = menuItem.getItemId();
 
         mFragmentManager
                 .beginTransaction()
                 .replace(R.id.main_container, fragment)
                 .commit();
-    }
 
-    private void setActiveTab(@NonNull MenuItem menuItem) {
-        // un check the other items.
-        for (int i = 0; i < mNavigationView.getMenu().size(); i++) {
-            MenuItem mItem = mNavigationView.getMenu().getItem(i);
-            mItem.setChecked(mItem.getItemId() == menuItem.getItemId());
-        }
+        mActiveMenuId = menuItem.getItemId();
     }
 }
