@@ -36,6 +36,6 @@
     <style name="AppTheme.Text.Time" parent="AppTheme.Text">
         <item name="android:textSize">@dimen/text_small</item>
         <item name="android:padding">@dimen/margin_small</item>
-        <item name="android:textStyle">italic</item>
+        <item name="android:textStyle">italic|bold</item>
     </style>
 </resources>
