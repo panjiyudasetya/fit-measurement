@@ -93,6 +93,29 @@ public class Content {
         }
     }
 
+    public static class LocationBuilder {
+        private String info;
+        private long recordedTime;
+        private static final DateFormat DT_FORMAT = DateFormat.getDateTimeInstance();
+
+        public LocationBuilder info(String info) {
+            this.info = info;
+            return this;
+        }
+
+        public LocationBuilder recordedTime(long recordedTime) {
+            this.recordedTime = recordedTime;
+            return this;
+        }
+
+        public String build() {
+            String strContent = "Geofencing Triggered :\n"
+                    + "\tInfo: " + info + "\n"
+                    + "\tDetected at: " + DT_FORMAT.format(recordedTime);
+            return strContent;
+        }
+    }
+
     public static class ActivityBuilder {
         private String activity;
         private int confidence;

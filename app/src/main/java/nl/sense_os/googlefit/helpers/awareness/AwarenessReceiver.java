@@ -127,26 +127,38 @@ public class AwarenessReceiver extends BroadcastReceiver {
     }
 
     private void logEnterLocationEvent() {
+        long recordedTime = System.currentTimeMillis();
         saveGeofenceEvent(new Content(
                 Content.GEOFENCE_TYPE,
-                "User entered " + SENSE_ID_HQ_LOCATION.name,
-                System.currentTimeMillis()
+                new Content.LocationBuilder()
+                        .info("User entered " + SENSE_ID_HQ_LOCATION.name)
+                        .recordedTime(recordedTime)
+                        .build(),
+                recordedTime
         ));
     }
 
     private void logExitLocationEvent() {
+        long recordedTime = System.currentTimeMillis();
         saveGeofenceEvent(new Content(
                 Content.GEOFENCE_TYPE,
-                "User exited location " + SENSE_ID_HQ_LOCATION.name,
-                System.currentTimeMillis()
+                new Content.LocationBuilder()
+                        .info("User exited location " + SENSE_ID_HQ_LOCATION.name)
+                        .recordedTime(recordedTime)
+                        .build(),
+                recordedTime
         ));
     }
 
     private void logOnFootEvent() {
+        long recordedTime = System.currentTimeMillis();
         saveGeofenceEvent(new Content(
                 Content.GEOFENCE_TYPE,
-                "User is on foot (walking or running)",
-                System.currentTimeMillis()
+                new Content.LocationBuilder()
+                    .info("User is on foot (walking or running)")
+                    .recordedTime(recordedTime)
+                    .build(),
+                recordedTime
         ));
     }
 
