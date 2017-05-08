@@ -5,5 +5,5 @@
         android:bottomRightRadius="0dp"
         android:topLeftRadius="@dimen/cardview_default_radius"
         android:topRightRadius="0dp" />
-    <solid android:color="@color/colorSleep" />
+    <solid android:color="@color/colorGeofence" />
 </shape>

@@ -12,7 +12,8 @@ import nl.sense_os.googlefit.R;
 import nl.sense_os.googlefit.constant.Navigation;
 import nl.sense_os.googlefit.core.BaseActivity;
 import nl.sense_os.googlefit.fragments.ContentListFragment;
-import nl.sense_os.googlefit.fragments.SleepHistoryFragment;
+import nl.sense_os.googlefit.fragments.DetectedActivityFragment;
+import nl.sense_os.googlefit.fragments.GeofenceHistoryFragment;
 import nl.sense_os.googlefit.fragments.StepCountFragment;
 
 public class MainActivity extends BaseActivity {
@@ -86,8 +87,11 @@ public class MainActivity extends BaseActivity {
             case R.id.menu_walk:
                 fragment = StepCountFragment.newInstance();
                 break;
-            case R.id.menu_sleep:
-                fragment = SleepHistoryFragment.newInstance();
+            case R.id.menu_geofence:
+                fragment = GeofenceHistoryFragment.newInstance();
+                break;
+            case R.id.menu_activity:
+                fragment = DetectedActivityFragment.newInstance();
                 break;
             default:
                 fragment = StepCountFragment.newInstance();

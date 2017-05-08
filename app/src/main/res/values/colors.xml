@@ -7,5 +7,6 @@
     <color name="colorBluePrimary">#2196F3</color>
 
     <color name="colorSteps">#7C4DFF</color>
-    <color name="colorSleep">#448AFF</color>
+    <color name="colorActivity">#448AFF</color>
+    <color name="colorGeofence">#40C4FF</color>
 </resources>

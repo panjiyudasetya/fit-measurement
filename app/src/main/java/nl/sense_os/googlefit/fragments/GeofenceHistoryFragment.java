@@ -3,55 +3,77 @@ package nl.sense_os.googlefit.fragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.fitness.Fitness;
-import com.google.android.gms.fitness.FitnessStatusCodes;
-import com.google.android.gms.fitness.data.DataType;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
-import nl.sense_os.googlefit.constant.Preference;
 import nl.sense_os.googlefit.entities.Content;
-import nl.sense_os.googlefit.helpers.DataCacheHelper;
-import nl.sense_os.googlefit.tasks.PopulateStepCountTask;
+import nl.sense_os.googlefit.entities.GeofenceLocation;
+import nl.sense_os.googlefit.eventbus.GeofenceEvent;
+import nl.sense_os.googlefit.helpers.awareness.AwarenessApiHelper;
+import nl.sense_os.googlefit.tasks.PopulateGeofenceDataTask;
 import nl.sense_os.googlefit.utils.SnackbarHelper;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
 /**
- * Created by panjiyudasetya on 5/3/17.
+ * Created by panjiyudasetya on 5/8/17.
  */
 
-public class StepCountFragment extends ContentListFragment {
-    private static final int CLIENT_MANAGING_ID = 0;
-    private static final String TAG = "SCF";
-    private GoogleApiClient mClient;
-    private static final DataCacheHelper CACHE = new DataCacheHelper();
+@SuppressWarnings("SpellCheckingInspection")
+public class GeofenceHistoryFragment extends ContentListFragment {
+    private static final int CLIENT_MANAGING_ID = 1;
+    private static final int PERMISSIONS_REQ_CODE = 102;
 
-    public static StepCountFragment newInstance() {
-        return new StepCountFragment();
+    private static final String TAG = "GHF";
+    private static final String[] PERMISSIONS = {
+            ACCESS_FINE_LOCATION,
+            ACCESS_COARSE_LOCATION,
+            "com.google.android.gms.permission.ACTIVITY_RECOGNITION"
+    };
+
+    private GoogleApiClient mClient;
+    private AwarenessApiHelper mAwarenessApiHelper;
+    private boolean mIsConnSuspended, mIsConnFailed;
+
+    public static GeofenceHistoryFragment newInstance() {
+        return new GeofenceHistoryFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        buildFitnessClient();
+        if (isAllPermissionGranted(PERMISSIONS)) buildAwarenessClient();
+        else ActivityCompat.requestPermissions(getActivity(), PERMISSIONS, PERMISSIONS_REQ_CODE);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        releaseFitnessClient();
+        if (mClient.isConnected() || mIsConnSuspended || mIsConnFailed) releaseAwarenessClient();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe
+    @SuppressWarnings("unused")//This function being used by EventBus
+    public void onGeofenceEvent(GeofenceEvent event) {
+        // receiving new geofence event data
+        if (event != null) populateData();
     }
 
     @Override
     protected void populateData() {
-        new PopulateStepCountTask(mClient) {
+        new PopulateGeofenceDataTask() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -63,7 +85,6 @@ public class StepCountFragment extends ContentListFragment {
                 super.onPostExecute(contents);
                 showProgress(false);
                 updateViews(contents);
-                if (!CACHE.load(Preference.STEP_COUNT_CONTENT_KEY).isEmpty()) hideEmptyView();
             }
         }.run();
     }
@@ -71,9 +92,7 @@ public class StepCountFragment extends ContentListFragment {
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.i(TAG, "Connected!!!");
-        // Now you can make calls to the Fitness APIs.  What to do?
-        // Subscribe to some data sources!
-        subscribe();
+        initGeofenceLocation();
     }
 
     @Override
@@ -90,6 +109,7 @@ public class StepCountFragment extends ContentListFragment {
             Log.w(TAG, message);
             SnackbarHelper.show(mContainer, message);
         }
+        mIsConnSuspended = true;
     }
 
     @Override
@@ -99,6 +119,20 @@ public class StepCountFragment extends ContentListFragment {
         SnackbarHelper.show(mContainer,
                 "Exception while connecting to Google Play services: "
                         + connectionResult.getErrorMessage());
+        mIsConnFailed = true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSIONS_REQ_CODE:
+                if (!isAllPermissionGranted(PERMISSIONS)) showPermissionsDeniedMessageDialog();
+                else buildAwarenessClient();
+                break;
+        }
     }
 
     /**
@@ -109,45 +143,25 @@ public class StepCountFragment extends ContentListFragment {
      * to resolve authentication failures (for example, the user has not signed in
      * before, or has multiple accounts and must specify which account to use).
      */
-    private void buildFitnessClient() {
+    private void buildAwarenessClient() {
         // Create the Google API Client
         mClient = new GoogleApiClient.Builder(getActivity())
-                .addApi(Fitness.RECORDING_API)
-                .addApi(Fitness.HISTORY_API)
-                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
+                .addApi(Awareness.API)
                 .addConnectionCallbacks(this)
                 .enableAutoManage(getActivity(), CLIENT_MANAGING_ID, this)
                 .build();
         mClient.connect();
+
+        mAwarenessApiHelper = new AwarenessApiHelper(getActivity(), mClient);
     }
 
-    private void releaseFitnessClient() {
+    private void releaseAwarenessClient() {
         mClient.stopAutoManage(getActivity());
         mClient.disconnect();
     }
 
-    /**
-     * Record step data by requesting a subscription to background step data.
-     */
-    private void subscribe() {
-        // To create a subscription, invoke the Recording API. As soon as the subscription is
-        // active, fitness data will start recording.
-        Fitness.RecordingApi
-                .subscribe(mClient, DataType.TYPE_STEP_COUNT_CUMULATIVE)
-                .setResultCallback(new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        if (status.isSuccess()) {
-                            if (status.getStatusCode()
-                                    == FitnessStatusCodes.SUCCESS_ALREADY_SUBSCRIBED) {
-                                SnackbarHelper.show(mContainer, "Existing subscription for activity detected.");
-                            } else {
-                                SnackbarHelper.show(mContainer, "Successfully subscribed!");
-                            }
-                        } else {
-                            SnackbarHelper.show(mContainer, "There was a problem subscribing.");
-                        }
-                    }
-                });
+    private void initGeofenceLocation() {
+        mAwarenessApiHelper.addOnFootFence();
+        mAwarenessApiHelper.addGeofence(GeofenceLocation.SENSE_ID_HQ_LOCATION);
     }
 }

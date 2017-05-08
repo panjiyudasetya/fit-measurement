@@ -1,8 +1,7 @@
-package nl.sense_os.googlefit.models;
+package nl.sense_os.googlefit.helpers;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -14,11 +13,7 @@ import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.result.DataReadResult;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.orhanobut.hawk.Hawk;
 
-import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import nl.sense_os.googlefit.constant.Preference;
 import nl.sense_os.googlefit.entities.Content;
 
 /**
@@ -44,7 +38,6 @@ public class StepCountHelper {
 
     // This is the date of Google Fit first release.
     private static final long BEGINNING_OF_THE_TIME = 1403654400000L;
-    private static final Gson GSON = new Gson();
 
     private GoogleApiClient mClient;
     private DateFormat mDateFormat;
@@ -54,19 +47,6 @@ public class StepCountHelper {
         this.mClient = client;
         this.mDateFormat = DateFormat.getDateInstance();
         this.mDateTimeFormat = DateFormat.getDateTimeInstance();
-    }
-
-    public void saveCache(@NonNull List<Content> newCache) {
-        Hawk.put(Preference.STEP_COUNT_CONTENT_KEY, GSON.toJson(newCache));
-    }
-
-    @NonNull
-    public List<Content> loadCache() {
-        String cache = Hawk.get(Preference.STEP_COUNT_CONTENT_KEY, "");
-        if (TextUtils.isEmpty(cache)) return Collections.emptyList();
-
-        Type token = new TypeToken<List<Content>>() { }.getType();
-        return GSON.fromJson(cache, token);
     }
 
     /**
@@ -84,9 +64,8 @@ public class StepCountHelper {
         // Invoke the History API to fetch the data with the query and await the result of
         // the read request.
         DataReadResult dataReadResult = readStepCountHistory(range[START_TIME], range[END_TIME]);
-        if (dataReadResult.getStatus().isSuccess()) {
-            return createContentFromBucket(dataReadResult.getBuckets());
-        } else Log.w(TAG, "There was a problem getting the step count.");
+        if (dataReadResult.getStatus().isSuccess()) return createContentFromBucket(dataReadResult.getBuckets());
+        else Log.w(TAG, "There was a problem getting the step count.");
         return Collections.emptyList();
     }
 
@@ -159,13 +138,13 @@ public class StepCountHelper {
         for (DataPoint dp : dataSet.getDataPoints()) {
             contents.add(new Content(
                     Content.STEPS_TYPE,
-                    new Content.Builder()
+                    new Content.StepBuilder()
                             .dataPointType(dp.getDataType().getName())
                             .startTimeDetected(mDateTimeFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)))
                             .endTimeDetected(mDateTimeFormat.format(dp.getEndTime(TimeUnit.MILLISECONDS)))
                             .fields(extractPairOfFields(dp))
                             .build(),
-                    mDateFormat.format(dp.getTimestamp(TimeUnit.MILLISECONDS))
+                    dp.getTimestamp(TimeUnit.MILLISECONDS)
             ));
         }
         return contents;

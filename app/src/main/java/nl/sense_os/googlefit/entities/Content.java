@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.DateFormat;
 import java.util.Map;
 
 /**
@@ -14,19 +15,21 @@ import java.util.Map;
 
 public class Content {
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ STEPS_TYPE, SLEEP_TYPE })
+    @IntDef({ STEPS_TYPE, GEOFENCE_TYPE, ACTIVITY_TYPE})
     public @interface ContentType {}
     public static final int STEPS_TYPE = 0;
-    public static final int SLEEP_TYPE = 1;
+    @SuppressWarnings("SpellCheckingInspection")
+    public static final int GEOFENCE_TYPE = 1;
+    public static final int ACTIVITY_TYPE = 2;
 
     @SerializedName("type")
     private int type;
     @SerializedName("content")
     private String content;
     @SerializedName("time_stamp")
-    private String timeStamp;
+    private long timeStamp;
 
-    public Content(@ContentType int type, String content, String timeStamp) {
+    public Content(@ContentType int type, String content, long timeStamp) {
         this.type = type;
         this.content = content;
         this.timeStamp = timeStamp;
@@ -40,32 +43,32 @@ public class Content {
         return content;
     }
 
-    public String getTimeStamp() {
+    public long getTimeStamp() {
         return timeStamp;
     }
 
-    public static class Builder {
+    public static class StepBuilder {
         private String dataPointType;
         private String startTimeDetected;
         private String endTimeDetected;
         private Map<String, String> fields;
 
-        public Builder dataPointType(String dataPointType) {
+        public StepBuilder dataPointType(String dataPointType) {
             this.dataPointType = dataPointType;
             return this;
         }
 
-        public Builder startTimeDetected(String startTimeDetected) {
+        public StepBuilder startTimeDetected(String startTimeDetected) {
             this.startTimeDetected = startTimeDetected;
             return this;
         }
 
-        public Builder endTimeDetected(String endTimeDetected) {
+        public StepBuilder endTimeDetected(String endTimeDetected) {
             this.endTimeDetected = endTimeDetected;
             return this;
         }
 
-        public Builder fields(Map<String, String> fields) {
+        public StepBuilder fields(Map<String, String> fields) {
             this.fields = fields;
             return this;
         }
@@ -87,6 +90,36 @@ public class Content {
                 }
             }
             return strContent + strFields;
+        }
+    }
+
+    public static class ActivityBuilder {
+        private String activity;
+        private int confidence;
+        private long recordedTime;
+        private static final DateFormat DT_FORMAT = DateFormat.getDateTimeInstance();
+
+        public ActivityBuilder activity(String activity) {
+            this.activity = activity;
+            return this;
+        }
+
+        public ActivityBuilder confidence(int confidence) {
+            this.confidence = confidence;
+            return this;
+        }
+
+        public ActivityBuilder recordedTime(long recordedTime) {
+            this.recordedTime = recordedTime;
+            return this;
+        }
+
+        public String build() {
+            String strContent = "Some Activity Detected :\n"
+                    + "\tType: " + activity + "\n"
+                    + "\tConfidence: " + confidence + "/100\n"
+                    + "\tDetected at: " + DT_FORMAT.format(recordedTime);
+            return strContent;
         }
     }
 }
