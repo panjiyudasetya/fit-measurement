@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import nl.sense_os.googlefit.entities.Content;
+import nl.sense_os.googlefit.entities.StepsCountResponse;
 
 /**
  * Created by panjiyudasetya on 5/5/17.
@@ -59,14 +60,17 @@ public class StepCountHelper {
      */
     @SuppressWarnings("unused")//This is a public API
     @NonNull
-    public List<Content> getWeeklyStepCount() {
+    public StepsCountResponse getWeeklyStepCount() {
         long[] range = getTimeRangeHistory();
         // Invoke the History API to fetch the data with the query and await the result of
         // the read request.
         DataReadResult dataReadResult = readStepCountHistory(range[START_TIME], range[END_TIME]);
-        if (dataReadResult.getStatus().isSuccess()) return createContentFromBucket(dataReadResult.getBuckets());
+        List<Content> contents = Collections.emptyList();
+        if (dataReadResult.getStatus().isSuccess()) {
+            return new StepsCountResponse(true, contents);
+        }
         else Log.w(TAG, "There was a problem getting the step count.");
-        return Collections.emptyList();
+        return new StepsCountResponse(false, contents);
     }
 
     /**
@@ -75,19 +79,25 @@ public class StepCountHelper {
      * reading historical data through {@link Fitness#HistoryApi} will be executed on main
      * thread by default.
      *
-     * @return {@link List<Content>} Historical steps content
+     * @return {@link StepsCountResponse} Historical steps content
      */
     @NonNull
-    public List<Content> getAllStepCountHistory() {
+    public StepsCountResponse getAllStepCountHistory() {
         long[] range = getTimeRangeHistory();
         // Invoke the History API to fetch the data with the query and await the result of
         // the read request.
         DataReadResult dataReadResult = readStepCountHistory(BEGINNING_OF_THE_TIME, range[END_TIME]);
+        List<Content> contents = Collections.emptyList();
         if (dataReadResult.getStatus().isSuccess()) {
-            if (USE_DATA_AGGREGATION) return createContentFromBucket(dataReadResult.getBuckets());
-            else return dumpDataSets(dataReadResult.getDataSets());
+            if (USE_DATA_AGGREGATION) {
+                contents = createContentFromBucket(dataReadResult.getBuckets());
+                return new StepsCountResponse(true, contents);
+            } else {
+                contents = dumpDataSets(dataReadResult.getDataSets());
+                return new StepsCountResponse(true, contents);
+            }
         } else Log.w(TAG, "There was a problem getting the step count.");
-        return Collections.emptyList();
+        return new StepsCountResponse(false, contents);
     }
 
     private DataReadResult readStepCountHistory(long startTime, long endTime) {

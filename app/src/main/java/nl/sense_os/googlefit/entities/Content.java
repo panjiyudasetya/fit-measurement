@@ -1,6 +1,8 @@
 package nl.sense_os.googlefit.entities;
 
+import android.location.Location;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -15,12 +17,14 @@ import java.util.Map;
 
 public class Content {
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ STEPS_TYPE, GEOFENCE_TYPE, ACTIVITY_TYPE})
+    @IntDef({ STEPS_TYPE, GEOFENCE_TYPE, ACTIVITY_TYPE, LOCATION_UPDATE_TYPE, ALARM_TYPE})
     public @interface ContentType {}
     public static final int STEPS_TYPE = 0;
     @SuppressWarnings("SpellCheckingInspection")
     public static final int GEOFENCE_TYPE = 1;
     public static final int ACTIVITY_TYPE = 2;
+    public static final int LOCATION_UPDATE_TYPE = 3;
+    public static final int ALARM_TYPE = 4;
 
     @SerializedName("type")
     private int type;
@@ -142,6 +146,24 @@ public class Content {
                     + "\tType: " + activity + "\n"
                     + "\tConfidence: " + confidence + "/100\n"
                     + "\tDetected at: " + DT_FORMAT.format(recordedTime);
+            return strContent;
+        }
+    }
+
+    public static class LocationUpdateBuilder {
+        private Location location;
+        private static final DateFormat DT_FORMAT = DateFormat.getDateTimeInstance();
+
+        public LocationUpdateBuilder(@NonNull Location location) {
+            this.location = location;
+        }
+
+        public String build() {
+            String strContent = "Update Location Detected :\n"
+                    + "\tType: " + location.getProvider() + "\n"
+                    + "\tLatitude: " + location.getLatitude() + "\n"
+                    + "\tLongitude:" + location.getLongitude() + "\n"
+                    + "\tDetected at: " + DT_FORMAT.format(location.getTime());
             return strContent;
         }
     }

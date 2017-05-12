@@ -1,5 +1,9 @@
 package nl.sense_os.googlefit.eventbus;
 
+import android.support.annotation.NonNull;
+
+import java.util.List;
+
 import nl.sense_os.googlefit.entities.Content;
 
 /**
@@ -7,9 +11,13 @@ import nl.sense_os.googlefit.entities.Content;
  */
 
 public class DetectedActivityEvent {
-    private Content content;
+    private List<Content> contents;
 
-    public DetectedActivityEvent(Content content) {
-        this.content = content;
+    public DetectedActivityEvent(@NonNull List<Content> contents) {
+        this.contents = contents;
+    }
+
+    public List<Content> getContents() {
+        return contents;
     }
 }

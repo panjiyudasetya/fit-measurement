@@ -18,6 +18,14 @@ public class GeofenceLocation {
             MINUTES.toMillis(10)
     );
 
+    public static final GeofenceLocation SENSE_NL_HQ_LOCATION = new GeofenceLocation(
+            "Sense HQ",
+            51.9034726d,
+            4.4576711d,
+            1000,
+            MINUTES.toMillis(10)
+    );
+
     public GeofenceLocation(String name, double latitude, double longitude, int radius, long loiteringDelay) {
         this.name = name;
         this.latitude = latitude;

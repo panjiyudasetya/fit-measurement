@@ -21,4 +21,11 @@
         android:icon="@drawable/ic_activity"
         android:title="@string/am_activity_label"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/menu_location"
+        android:orderInCategory="3"
+        android:enabled="true"
+        android:icon="@drawable/ic_location_update"
+        android:title="@string/am_location_update"
+        app:showAsAction="ifRoom"/>
 </menu>

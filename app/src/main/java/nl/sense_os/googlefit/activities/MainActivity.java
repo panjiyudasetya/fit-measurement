@@ -9,11 +9,14 @@ import android.view.MenuItem;
 
 import butterknife.BindView;
 import nl.sense_os.googlefit.R;
+import nl.sense_os.googlefit.awareness.AwarenessIntentService;
+import nl.sense_os.googlefit.awareness.GoogleFitIntentService;
 import nl.sense_os.googlefit.constant.Navigation;
 import nl.sense_os.googlefit.core.BaseActivity;
 import nl.sense_os.googlefit.fragments.ContentListFragment;
 import nl.sense_os.googlefit.fragments.DetectedActivityFragment;
 import nl.sense_os.googlefit.fragments.GeofenceHistoryFragment;
+import nl.sense_os.googlefit.fragments.LocationHistoryFragment;
 import nl.sense_os.googlefit.fragments.StepCountFragment;
 
 public class MainActivity extends BaseActivity {
@@ -40,6 +43,12 @@ public class MainActivity extends BaseActivity {
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(Navigation.SELECTED_ITEM_KEY, mSelectedItem);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        subscribe();
     }
 
     @Override
@@ -93,6 +102,9 @@ public class MainActivity extends BaseActivity {
             case R.id.menu_activity:
                 fragment = DetectedActivityFragment.newInstance();
                 break;
+            case R.id.menu_location:
+                fragment = LocationHistoryFragment.newInstance();
+                break;
             default:
                 fragment = StepCountFragment.newInstance();
                 break;
@@ -106,5 +118,10 @@ public class MainActivity extends BaseActivity {
                 .commit();
 
         mActiveMenuId = menuItem.getItemId();
+    }
+
+    public void subscribe() {
+        startService(AwarenessIntentService.withContext(this));
+        startService(GoogleFitIntentService.withContext(this));
     }
 }

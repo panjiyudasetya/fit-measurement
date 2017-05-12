@@ -10,11 +10,10 @@ import nl.sense_os.googlefit.entities.Content;
  * Created by panjiyudasetya on 5/8/17.
  */
 
-@SuppressWarnings("SpellCheckingInspection")
-public class GeofenceEvent {
+public class DetectedStepsCountEvent {
     private List<Content> contents;
 
-    public GeofenceEvent(@NonNull List<Content> contents) {
+    public DetectedStepsCountEvent(@NonNull List<Content> contents) {
         this.contents = contents;
     }
 

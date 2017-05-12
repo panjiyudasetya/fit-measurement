@@ -8,16 +8,16 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import nl.sense_os.googlefit.eventbus.DetectedActivityEvent;
+import nl.sense_os.googlefit.eventbus.LocationChangeEvent;
 
 /**
  * Created by panjiyudasetya on 5/4/17.
  */
 
-public class DetectedActivityFragment extends ContentListFragment {
+public class LocationHistoryFragment extends ContentListFragment {
 
-    public static DetectedActivityFragment newInstance() {
-        return new DetectedActivityFragment();
+    public static LocationHistoryFragment newInstance() {
+        return new LocationHistoryFragment();
     }
 
     @Override
@@ -46,9 +46,10 @@ public class DetectedActivityFragment extends ContentListFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     @SuppressWarnings("unused")//This function being used by EventBus
-    public void onDetectedActivityEvent(DetectedActivityEvent event) {
+    public void onLocationChangeEvent(LocationChangeEvent event) {
         if (event == null) return;
+
         showProgress(false);
-        updateViews(event.getContents());
+        if (event.isSuccessfull()) updateViews(event.getContents());
     }
 }

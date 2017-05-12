@@ -8,10 +8,13 @@ import com.google.gson.reflect.TypeToken;
 import com.orhanobut.hawk.Hawk;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import nl.sense_os.googlefit.entities.Content;
+
+import static nl.sense_os.googlefit.utils.CollectionUtils.sortDesc;
 
 /**
  * Created by panjiyudasetya on 5/5/17.
@@ -19,6 +22,13 @@ import nl.sense_os.googlefit.entities.Content;
 
 public class DataCacheHelper {
     private static final Gson GSON = new Gson();
+
+    public void save(@NonNull String key, @NonNull Content newCache) {
+        List<Content> contents = load(key);
+        if (contents.isEmpty()) contents = new ArrayList<>();
+        contents.add(newCache);
+        save(key, contents);
+    }
 
     public void save(@NonNull String key, @NonNull List<Content> newCache) {
         Hawk.put(key, GSON.toJson(newCache));
@@ -31,6 +41,7 @@ public class DataCacheHelper {
 
         Type token = new TypeToken<List<Content>>() { }.getType();
         List<Content> results = GSON.fromJson(cache, token);
+        if (results != null) sortDesc(results);
         return results == null ? Collections.<Content>emptyList() : results;
     }
 }

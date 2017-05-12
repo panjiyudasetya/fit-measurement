@@ -9,7 +9,8 @@
 
 
     <!-- Bottom Navigation Action Menu -->
-    <string name="am_steps_label">Steps Count</string>
-    <string name="am_geofence_label">Geofence</string>
-    <string name="am_activity_label">Activities</string>
+    <string name="am_steps_label">Steps Count History</string>
+    <string name="am_geofence_label">Geofencing History</string>
+    <string name="am_activity_label">Activities History</string>
+    <string name="am_location_update">Locations History</string>
 </resources>

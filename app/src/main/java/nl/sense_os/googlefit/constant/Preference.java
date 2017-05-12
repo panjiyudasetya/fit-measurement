@@ -11,5 +11,7 @@ public class Preference {
     @SuppressWarnings("SpellCheckingInspection")
     public static final String GEOFENCE_CONTENT_KEY = "geofence_content_key";
     public static final String DETECTED_ACTIVITY_CONTENT_KEY = "detected_activity_content_key";
+    public static final String LOCATION_UPDATE_CONTENT_KEY = "location_update_content_key";
+    public static final String ALARM_HISTORY_CONTENT_KEY = "alarm_history_content_key";
     public static final String IS_SENSE_HQ_ALREADY_REGISTERED_KEY = "is_sense_hq_already_registered";
 }
