@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresPermission;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -17,7 +16,7 @@ import com.orhanobut.hawk.Hawk;
 import java.util.ArrayList;
 import java.util.List;
 
-import nl.sense_os.googlefit.awareness.receivers.GeofenceReceiver;
+import nl.sense_os.googlefit.receivers.GeofenceReceiver;
 
 import static nl.sense_os.googlefit.constant.Preference.IS_SENSE_HQ_ALREADY_REGISTERED_KEY;
 import static nl.sense_os.googlefit.entities.GeofenceLocation.SENSE_ID_HQ_LOCATION;

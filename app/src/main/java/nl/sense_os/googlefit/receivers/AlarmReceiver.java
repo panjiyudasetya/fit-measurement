@@ -1,4 +1,4 @@
-package nl.sense_os.googlefit.helpers.alarm;
+package nl.sense_os.googlefit.receivers;
 
 
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 
 import java.util.Locale;
 
-import nl.sense_os.googlefit.awareness.receivers.BaseReceiver;
+import nl.sense_os.googlefit.helpers.AlarmHelper;
 import nl.sense_os.googlefit.entities.Content;
 import nl.sense_os.googlefit.helpers.DataCacheHelper;
 

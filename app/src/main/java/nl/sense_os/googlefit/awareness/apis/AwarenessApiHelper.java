@@ -10,7 +10,7 @@ import com.google.android.gms.location.ActivityRecognition;
 
 import java.util.concurrent.TimeUnit;
 
-import nl.sense_os.googlefit.awareness.receivers.ActivityReceiver;
+import nl.sense_os.googlefit.receivers.ActivityReceiver;
 
 public class AwarenessApiHelper {
     private final Context context;

@@ -41,8 +41,23 @@
         <service android:name=".awareness.GoogleFitService"
             android:exported="false"/>
         <!-- Receivers -->
-        <receiver android:name=".awareness.receivers.GeofenceReceiver" />
-        <receiver android:name=".awareness.receivers.ActivityReceiver" />
+        <receiver android:name=".receivers.AlarmReceiver" />
+        <receiver android:name=".receivers.GeofenceReceiver" />
+        <receiver android:name=".receivers.ActivityReceiver" />
+        <receiver android:name=".receivers.BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receivers.PowerReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+                <action android:name="android.intent.action.BATTERY_LOW"/>
+                <action android:name="android.intent.action.BATTERY_OKAY"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

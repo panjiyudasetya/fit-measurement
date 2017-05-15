@@ -18,7 +18,7 @@ import nl.sense_os.googlefit.fragments.DetectedActivityFragment;
 import nl.sense_os.googlefit.fragments.GeofenceHistoryFragment;
 import nl.sense_os.googlefit.fragments.LocationHistoryFragment;
 import nl.sense_os.googlefit.fragments.StepCountFragment;
-import nl.sense_os.googlefit.helpers.alarm.AlarmHelper;
+import nl.sense_os.googlefit.helpers.AlarmHelper;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;

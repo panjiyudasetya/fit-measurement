@@ -1,4 +1,4 @@
-package nl.sense_os.googlefit.awareness.receivers;
+package nl.sense_os.googlefit.receivers;
 
 
 import android.content.Context;

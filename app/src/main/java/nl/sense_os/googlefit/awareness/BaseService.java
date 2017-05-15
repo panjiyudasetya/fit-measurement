@@ -157,7 +157,7 @@ public abstract class BaseService extends Service
     private void buildGoogleApiClient(@NonNull Api[] apis, @Nullable Scope[] scopes) {
         // Create the Google API Client
         if (mClient == null) {
-            mClient = builderWithApisAndScopes(apis, scopes).build();
+            mClient = buildGoogleApiClientWithApisAndScopes(apis, scopes);
             mClient.connect();
         }
     }
@@ -168,16 +168,16 @@ public abstract class BaseService extends Service
     }
 
     /**
-     * Helper function to create {@link com.google.android.gms.common.api.GoogleApiClient.Builder} based on
-     * specific Apis and Scopes
+     * Helper function to create {@link GoogleApiClient} based on specific Apis and Scopes
      *
      * @param apis      Array of Api Client {@link Api}
      * @param scopes    Array of {@link Scope} Api Client
-     * @return {@link com.google.android.gms.common.api.GoogleApiClient.Builder}
+     * @return {@link GoogleApiClient}
      * @throws IllegalArgumentException
      */
-    private GoogleApiClient.Builder builderWithApisAndScopes(@NonNull Api[] apis,
-                                                             @Nullable Scope[] scopes) throws IllegalArgumentException {
+    private GoogleApiClient buildGoogleApiClientWithApisAndScopes(@NonNull Api[] apis,
+                                                                  @Nullable Scope[] scopes)
+            throws IllegalArgumentException {
         if (apis.length == 0) {
             String message = "Unable to continue this action, Google Api Client should contain at least one Api";
             throw new IllegalArgumentException(message);
@@ -189,7 +189,7 @@ public abstract class BaseService extends Service
         }
         builder.addConnectionCallbacks(this);
         builder.addOnConnectionFailedListener(this);
-        return builder;
+        return builder.build();
     }
 
     private void setPlayServiceConnection(boolean isConnected) {
