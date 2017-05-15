@@ -1,6 +1,5 @@
-package nl.sense_os.googlefit.awareness.receivers;
+package nl.sense_os.googlefit.receivers;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -12,11 +11,11 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
-import nl.sense_os.googlefit.awareness.AwarenessIntentService;
 import nl.sense_os.googlefit.constant.Preference;
 import nl.sense_os.googlefit.entities.Content;
 import nl.sense_os.googlefit.eventbus.DetectedActivityEvent;
 import nl.sense_os.googlefit.helpers.DataCacheHelper;
+import nl.sense_os.googlefit.tasks.PopulateActivityDataTask;
 
 import static nl.sense_os.googlefit.helpers.NotificationHelper.createNotification;
 
@@ -24,19 +23,16 @@ import static nl.sense_os.googlefit.helpers.NotificationHelper.createNotificatio
  * Created by panjiyudasetya on 5/12/17.
  */
 
-public class ActivityReceiver extends BroadcastReceiver {
+public class ActivityReceiver extends BaseReceiver {
     private static final DataCacheHelper CACHE = new DataCacheHelper();
     private static final String ACTIVITY_RECOGNITION_EVENT_TITLE = "Activity Recognition";
     private static final int ACTIVITY_RECOGNITION_EVENT_NOTIFICATION_ID = 101;
     private static final int ACCEPTANCE_DETECTED_ACT_PERCENTAGE = 80;
 
-    private Context mContext;
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        mContext = context;
+        super.onReceive(context, intent);
         if (ActivityRecognitionResult.hasResult(intent)) handleActivityRecognition(intent);
-        mContext.startService(AwarenessIntentService.withContext(context));
     }
 
     private void handleActivityRecognition(@NonNull Intent intent) {
@@ -106,11 +102,7 @@ public class ActivityReceiver extends BroadcastReceiver {
         CACHE.save(Preference.DETECTED_ACTIVITY_CONTENT_KEY, content);
 
         // Broadcast detected activity event
-        EventBus.getDefault()
-                .post(new DetectedActivityEvent(
-                        CACHE.load(Preference.DETECTED_ACTIVITY_CONTENT_KEY)
-                )
-        );
+        consumeActivityData();
 
         // Create notification
         createNotification(
@@ -120,5 +112,15 @@ public class ActivityReceiver extends BroadcastReceiver {
                 notificationId,
                 false
         );
+    }
+
+    private void consumeActivityData() {
+        new PopulateActivityDataTask() {
+            @Override
+            protected void onPostExecute(List<Content> contents) {
+                super.onPostExecute(contents);
+                EventBus.getDefault().post(new DetectedActivityEvent(contents));
+            }
+        }.run();
     }
 }

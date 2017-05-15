@@ -6,8 +6,9 @@ import android.view.View;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
+import nl.sense_os.googlefit.awareness.GoogleFitService;
+import nl.sense_os.googlefit.constant.ServiceType;
 import nl.sense_os.googlefit.eventbus.DetectedStepsCountEvent;
 
 /**
@@ -15,7 +16,6 @@ import nl.sense_os.googlefit.eventbus.DetectedStepsCountEvent;
  */
 
 public class StepCountFragment extends ContentListFragment {
-    private static final String TAG = "SCF";
 
     public static StepCountFragment newInstance() {
         return new StepCountFragment();
@@ -45,10 +45,20 @@ public class StepCountFragment extends ContentListFragment {
         subscribe();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe
     @SuppressWarnings("unused")//This function being used by EventBus
     public void onDetectedStepsCountEvent(@Nullable DetectedStepsCountEvent event) {
         showProgress(false);
         updateViews(event.getContents());
+    }
+
+    @Override
+    protected void subscribe() {
+        getActivity().startService(
+                GoogleFitService.withContext(
+                        getActivity(),
+                        ServiceType.Fitness.STEPS_COUNT
+                )
+        );
     }
 }

@@ -1,4 +1,4 @@
-package nl.sense_os.googlefit.helpers.alarm;
+package nl.sense_os.googlefit.helpers;
 
 
 import android.app.AlarmManager;
@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+
+import nl.sense_os.googlefit.receivers.AlarmReceiver;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -48,7 +50,7 @@ public class AlarmHelper {
     }
 
     public void startRepeatingAlarm() {
-        final int repeatingIntervalInMinutes = 5;
+        final int repeatingIntervalInMinutes = 15;
         final long fiveMinutesFromNow = System.currentTimeMillis() + MINUTES.toMillis(5);
         Intent repeatingIntent = new Intent(context, AlarmReceiver.class)
                 .setAction(REPEATING_ALARM)

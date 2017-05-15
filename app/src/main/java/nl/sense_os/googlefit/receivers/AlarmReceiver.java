@@ -1,13 +1,13 @@
-package nl.sense_os.googlefit.helpers.alarm;
+package nl.sense_os.googlefit.receivers;
 
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+
 import java.util.Locale;
-import nl.sense_os.googlefit.awareness.AwarenessIntentService;
-import nl.sense_os.googlefit.awareness.GoogleFitIntentService;
+
+import nl.sense_os.googlefit.helpers.AlarmHelper;
 import nl.sense_os.googlefit.entities.Content;
 import nl.sense_os.googlefit.helpers.DataCacheHelper;
 
@@ -18,14 +18,12 @@ import static nl.sense_os.googlefit.constant.Extras.EXPECTED_INTERVAL;
 import static nl.sense_os.googlefit.constant.Extras.SCHEDULING_TIME;
 import static nl.sense_os.googlefit.constant.Preference.ALARM_HISTORY_CONTENT_KEY;
 
-public class AlarmReceiver extends BroadcastReceiver {
+public class AlarmReceiver extends BaseReceiver {
     private static final DataCacheHelper CACHE = new DataCacheHelper();
-    private Context mContext;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        this.mContext = context;
-        startService();
+        super.onReceive(context, intent);
         String action = intent.getAction();
         if (action == null) return;
         if (REPEATING_ALARM.equals(action)) {
@@ -33,11 +31,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         } else if (SELF_SCHEDULING_ALARM.equals(action)) {
             processSelfSchedulingAlarm(intent);
         }
-    }
-
-    private void startService() {
-        mContext.startService(AwarenessIntentService.withContext(mContext));
-        mContext.startService(GoogleFitIntentService.withContext(mContext));
     }
 
     private void processSelfSchedulingAlarm(Intent intent) {

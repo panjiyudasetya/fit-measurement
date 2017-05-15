@@ -1,11 +1,11 @@
-package nl.sense_os.googlefit.awareness.receivers;
+package nl.sense_os.googlefit.receivers;
 
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
@@ -18,24 +18,27 @@ import java.util.List;
 
 import nl.sense_os.googlefit.constant.Preference;
 import nl.sense_os.googlefit.entities.Content;
+import nl.sense_os.googlefit.eventbus.GeofenceEvent;
 import nl.sense_os.googlefit.helpers.DataCacheHelper;
+import nl.sense_os.googlefit.tasks.PopulateGeofenceDataTask;
 
 import static nl.sense_os.googlefit.helpers.NotificationHelper.createNotification;
 
 @SuppressWarnings("SpellCheckingInspection")
-public class GeofenceReceiver extends BroadcastReceiver {
+public class GeofenceReceiver extends BaseReceiver {
+    private static final String TAG = "GEOFENCE_RECEIVER";
     private static final DataCacheHelper CACHE = new DataCacheHelper();
     private static final String GEOFENCE_EVENT_TITLE = "Geofence Event Triggered";
     private static final int GEOFENCE_EVENT_NOTIFICATION_ID = 101;
 
-    private Context mContext;
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        mContext = context;
+        super.onReceive(context, intent);
+        Log.i(TAG, "Event received");
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
             String message = getErrorString(geofencingEvent.getErrorCode());
+            Log.w(TAG, "Error received. " + message);
             logErrorEvent(message);
             return;
         }
@@ -92,8 +95,7 @@ public class GeofenceReceiver extends BroadcastReceiver {
         CACHE.save(Preference.GEOFENCE_CONTENT_KEY, content);
 
         // Broadcast geofence event
-        EventBus.getDefault()
-                .post(CACHE.load(Preference.GEOFENCE_CONTENT_KEY));
+        consumeGeofenceData();
 
         // Create notification
         createNotification(
@@ -103,6 +105,17 @@ public class GeofenceReceiver extends BroadcastReceiver {
                 GEOFENCE_EVENT_NOTIFICATION_ID,
                 true
         );
+    }
+
+    private void consumeGeofenceData() {
+        new PopulateGeofenceDataTask() {
+            @Override
+            protected void onPostExecute(List<Content> contents) {
+                super.onPostExecute(contents);
+                EventBus.getDefault()
+                        .post(new GeofenceEvent(contents));
+            }
+        }.run();
     }
 
     /**
