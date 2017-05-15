@@ -6,8 +6,9 @@ import android.view.View;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
+import nl.sense_os.googlefit.awareness.AwarenessService;
+import nl.sense_os.googlefit.constant.ServiceType;
 import nl.sense_os.googlefit.eventbus.DetectedActivityEvent;
 
 /**
@@ -44,11 +45,21 @@ public class DetectedActivityFragment extends ContentListFragment {
         subscribe();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe
     @SuppressWarnings("unused")//This function being used by EventBus
     public void onDetectedActivityEvent(DetectedActivityEvent event) {
         if (event == null) return;
         showProgress(false);
         updateViews(event.getContents());
+    }
+
+    @Override
+    protected void subscribe() {
+        getActivity().startService(
+                AwarenessService.withContext(
+                        getActivity(),
+                        ServiceType.Awareness.ACTIVITIES
+                )
+        );
     }
 }

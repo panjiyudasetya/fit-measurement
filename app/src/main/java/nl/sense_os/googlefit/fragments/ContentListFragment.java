@@ -1,5 +1,6 @@
 package nl.sense_os.googlefit.fragments;
 
+import android.content.IntentSender;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -9,21 +10,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+
 import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
 import nl.sense_os.googlefit.R;
-import nl.sense_os.googlefit.activities.MainActivity;
 import nl.sense_os.googlefit.adapters.ContentListAdapter;
 import nl.sense_os.googlefit.core.BaseFragment;
 import nl.sense_os.googlefit.entities.Content;
-import nl.sense_os.googlefit.eventbus.AwarenessConnReceivedEvent;
+import nl.sense_os.googlefit.eventbus.GAClientConnReceivedEvent;
 import nl.sense_os.googlefit.utils.SnackbarHelper;
 
+import static nl.sense_os.googlefit.eventbus.GAClientConnReceivedEvent.Status;
 /**
  * Created by panjiyudasetya on 5/3/17.
  */
@@ -41,6 +43,7 @@ public abstract class ContentListFragment extends BaseFragment implements SwipeR
 
     private ContentListAdapter mAdapter;
     protected abstract void populateData();
+    protected abstract void subscribe();
 
     @Override
     protected int initWithLayout() {
@@ -78,25 +81,23 @@ public abstract class ContentListFragment extends BaseFragment implements SwipeR
         populateData();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe
     @SuppressWarnings("unused")//This function being used by EventBus
-    public void onAwarenessConnReceivedEvent(AwarenessConnReceivedEvent event) {
+    public void onAwarenessConnReceivedEvent(GAClientConnReceivedEvent event) {
         // receiving Awareness connection event
         if (event == null) return;
 
-        AwarenessConnReceivedEvent.Status status = event.getStatus();
-        String  message = event.getMessage();
-        if (status.equals(AwarenessConnReceivedEvent.Status.CONNECTED)) {
+        Status status = event.getStatus();
+        String message = event.getMessage();
+        if (status.equals(Status.CONNECTED)) {
             Log.i(TAG, "Connected!!!");
+        } else if (status.equals(Status.SIGN_IN_REQUIRED)) {
+            ConnectionResult connectionResult = event.getConnResult();
+            if (connectionResult != null) resolvePlayServiceCredentialProblem(connectionResult);
         } else {
             Log.w(TAG, message);
+            showProgress(false);
             SnackbarHelper.show(mContainer, message);
-        }
-    }
-
-    protected void subscribe() {
-        if (MainActivity.class.isInstance(getActivity())) {
-            ((MainActivity) getActivity()).subscribe();
         }
     }
 
@@ -113,5 +114,13 @@ public abstract class ContentListFragment extends BaseFragment implements SwipeR
                 R.color.colorBluePrimary,
                 R.color.colorPrimary,
                 R.color.colorPrimaryDark);
+    }
+
+    private void resolvePlayServiceCredentialProblem(@NonNull ConnectionResult connectionResult) {
+        try {
+            connectionResult.startResolutionForResult(getActivity(), ConnectionResult.SIGN_IN_REQUIRED);
+        } catch (IntentSender.SendIntentException ex) {
+            Log.e(TAG, ex.toString());
+        }
     }
 }

@@ -31,6 +31,7 @@ public class DataCacheHelper {
     }
 
     public void save(@NonNull String key, @NonNull List<Content> newCache) {
+        if (newCache != null) sortDesc(newCache);
         Hawk.put(key, GSON.toJson(newCache));
     }
 

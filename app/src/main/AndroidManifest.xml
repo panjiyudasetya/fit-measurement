@@ -36,9 +36,9 @@
             </intent-filter>
         </activity>
         <!-- Services -->
-        <service android:name=".awareness.AwarenessIntentService"
+        <service android:name=".awareness.AwarenessService"
             android:exported="false"/>
-        <service android:name=".awareness.GoogleFitIntentService"
+        <service android:name=".awareness.GoogleFitService"
             android:exported="false"/>
         <!-- Receivers -->
         <receiver android:name=".awareness.receivers.GeofenceReceiver" />

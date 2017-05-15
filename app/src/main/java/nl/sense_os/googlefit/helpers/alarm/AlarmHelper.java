@@ -48,7 +48,7 @@ public class AlarmHelper {
     }
 
     public void startRepeatingAlarm() {
-        final int repeatingIntervalInMinutes = 5;
+        final int repeatingIntervalInMinutes = 15;
         final long fiveMinutesFromNow = System.currentTimeMillis() + MINUTES.toMillis(5);
         Intent repeatingIntent = new Intent(context, AlarmReceiver.class)
                 .setAction(REPEATING_ALARM)
