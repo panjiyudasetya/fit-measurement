@@ -16,13 +16,20 @@ import com.orhanobut.hawk.Hawk;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import nl.sense_os.googlefit.awareness.apis.AwarenessApiHelper;
 import nl.sense_os.googlefit.awareness.apis.LocationUpdateApiHelper;
 import nl.sense_os.googlefit.awareness.apis.MonitoringGeofenceApiHelper;
 import nl.sense_os.googlefit.constant.ServiceType;
 import nl.sense_os.googlefit.entities.Content;
+import nl.sense_os.googlefit.eventbus.DetectedActivityEvent;
+import nl.sense_os.googlefit.eventbus.GeofenceEvent;
 import nl.sense_os.googlefit.eventbus.LocationChangeEvent;
 import nl.sense_os.googlefit.helpers.DataCacheHelper;
+import nl.sense_os.googlefit.tasks.PopulateActivityDataTask;
+import nl.sense_os.googlefit.tasks.PopulateGeofenceDataTask;
+import nl.sense_os.googlefit.tasks.PopulateLocationsDataTask;
 
 import static nl.sense_os.googlefit.constant.Preference.LOCATION_UPDATE_CONTENT_KEY;
 
@@ -65,8 +72,9 @@ public class AwarenessService extends BaseService implements LocationListener {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        mLocationHelper.stopLocationUpdates();
         Hawk.put(KEY_ACTIVATED, false);
+        super.onDestroy();
     }
 
     @Override
@@ -101,24 +109,62 @@ public class AwarenessService extends BaseService implements LocationListener {
         );
 
         CACHE.save(LOCATION_UPDATE_CONTENT_KEY, content);
-        EventBus.getDefault()
-                .post(new LocationChangeEvent(
-                        CACHE.load(LOCATION_UPDATE_CONTENT_KEY)
-                ));
+        consumeLocationsData();
     }
 
     private void startAwareness() {
-        if (mServiceType == ServiceType.Awareness.ACTIVITIES) mAwarenessHelper.requestUpdateActivity();
-        else if (mServiceType == ServiceType.Awareness.GEOFENCING) mGeofenceHelper.addSenseHQGeofences();
-        else if (mServiceType == ServiceType.Awareness.LOCATION_UPDATES) startLocationUpdates();
+        if (mServiceType == ServiceType.Awareness.ACTIVITIES) consumeActivityData();
+        else if (mServiceType == ServiceType.Awareness.GEOFENCING) consumeGeofencingData();
+        else if (mServiceType == ServiceType.Awareness.LOCATION_UPDATES) consumeLocationsData(true);
         else if (mServiceType == ServiceType.Awareness.ALL) {
-            mAwarenessHelper.requestUpdateActivity();
-            mGeofenceHelper.addSenseHQGeofences();
-            startLocationUpdates();
+            consumeActivityData();
+            consumeGeofencingData();
+            consumeLocationsData(true);
         }
     }
 
-    private void startLocationUpdates() {
+    private void consumeActivityData() {
+        mAwarenessHelper.requestUpdateActivity();
+        new PopulateActivityDataTask() {
+            @Override
+            protected void onPostExecute(List<Content> contents) {
+                super.onPostExecute(contents);
+                EventBus.getDefault().post(new DetectedActivityEvent(contents));
+            }
+        }.run();
+    }
+
+    private void consumeGeofencingData() {
+        mGeofenceHelper.addSenseHQGeofences();
+        new PopulateGeofenceDataTask() {
+            @Override
+            protected void onPostExecute(List<Content> contents) {
+                super.onPostExecute(contents);
+                EventBus.getDefault()
+                        .post(new GeofenceEvent(contents));
+            }
+        }.run();
+    }
+
+    private void consumeLocationsData(boolean trackNewUpdates) {
+        if (trackNewUpdates) {
+            consumeLocationsData();
+            startLocationsUpdate();
+        } else consumeLocationsData();
+    }
+
+    private void consumeLocationsData() {
+        new PopulateLocationsDataTask() {
+            @Override
+            protected void onPostExecute(List<Content> contents) {
+                super.onPostExecute(contents);
+                EventBus.getDefault()
+                        .post(new LocationChangeEvent(contents));
+            }
+        }.run();
+    }
+
+    private void startLocationsUpdate() {
         mLocationHelper.startLocationUpdates(new LocationUpdateApiHelper.OnLocationUpdateFailureListener() {
             @Override
             public void onPermissionNeeded(String message) {
